@@ -1,122 +1,95 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+
+import { useEffect, useState } from "react";
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
+import FilterBar from "./components/FilterBar";
+import "./App.css";
+
+const STORAGE_KEY = "quicktask-tasks";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks, setTasks] = useState(() => {
+    try {
+      const savedTasks = localStorage.getItem(STORAGE_KEY);
+      return savedTasks ? JSON.parse(savedTasks) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [filter, setFilter] = useState("all");
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }, [tasks]);
+
+  function addTask(title) {
+    const newTask = {
+      id: crypto.randomUUID(),
+      title,
+      completed: false,
+    };
+
+    setTasks((previousTasks) => [...previousTasks, newTask]);
+  }
+
+  function toggleTask(id) {
+    setTasks((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === id
+          ? { ...task, completed: !task.completed }
+          : task
+      )
+    );
+  }
+
+  function deleteTask(id) {
+    setTasks((previousTasks) =>
+      previousTasks.filter((task) => task.id !== id)
+    );
+  }
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "active") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true;
+  });
+
+  const completedCount = tasks.filter((task) => task.completed).length;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <main className="app-container">
+      <header className="app-header">
+        <p className="eyebrow">YOUR DAILY PRODUCTIVITY SPACE</p>
+        <h1>QuickTask<span>.</span></h1>
+        <p className="subtitle">Small steps. Big progress.</p>
+      </header>
+
+      <section className="task-card">
+        <TaskForm onAddTask={addTask} />
+
+        <div className="task-summary">
+          <span>{tasks.length} total tasks</span>
+          <span>{completedCount} completed</span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+
+        <FilterBar
+          currentFilter={filter}
+          onFilterChange={setFilter}
+        />
+
+        <TaskList
+          tasks={filteredTasks}
+          onToggleTask={toggleTask}
+          onDeleteTask={deleteTask}
+        />
       </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <footer className="app-footer">
+        Built with React and a little focus.
+      </footer>
+    </main>
+  );
 }
 
-export default App
+export default App;
