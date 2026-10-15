@@ -1,18 +1,25 @@
 
-const filters = ["all", "active", "completed"];
+function FilterBar({ filter, setFilter, counts }) {
+  const filters = [
+    { label: "All Tasks", value: "all", count: counts.all },
+    { label: "Active", value: "active", count: counts.active },
+    { label: "Completed", value: "completed", count: counts.completed },
+  ];
 
-function FilterBar({ currentFilter, onFilterChange }) {
   return (
     <div className="filter-bar" aria-label="Filter tasks">
-      {filters.map((filter) => (
+      {filters.map((item) => (
         <button
-          key={filter}
+          key={item.value}
           type="button"
-          className={currentFilter === filter ? "filter-button active" : "filter-button"}
-          aria-pressed={currentFilter === filter}
-          onClick={() => onFilterChange(filter)}
+          className={`filter-button ${
+            filter === item.value ? "active" : ""
+          }`}
+          aria-pressed={filter === item.value}
+          onClick={() => setFilter(item.value)}
         >
-          {filter.charAt(0).toUpperCase() + filter.slice(1)}
+          {item.label}
+          <span className="filter-count">{item.count}</span>
         </button>
       ))}
     </div>

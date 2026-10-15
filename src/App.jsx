@@ -73,10 +73,17 @@ function App() {
           <span>{completedCount} completed</span>
         </div>
 
-        <FilterBar
-          currentFilter={filter}
-          onFilterChange={setFilter}
-        />
+        
+<FilterBar
+  filter={filter}
+  setFilter={setFilter}
+  counts={{
+    all: tasks.length,
+    active: tasks.filter((task) => !task.completed).length,
+    completed: tasks.filter((task) => task.completed).length,
+  }}
+/>
+
 
         <TaskList
           tasks={filteredTasks}
